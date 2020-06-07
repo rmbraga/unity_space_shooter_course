@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class Powerup : MonoBehaviour
 {
+    enum PowerupTypeEnum { TRIPLE_SHOT, SPEED_BOOST, SHIELD, NONE }
+
     [SerializeField]
     private float _speed = 3.0f;
+    [SerializeField]
+    private PowerupTypeEnum _powerupType;
 
     // Update is called once per frame
     void Update()
@@ -24,9 +28,27 @@ public class Powerup : MonoBehaviour
             Player player = other.transform.GetComponent<Player>();
             if (player != null)
             {
-                player.TripleShotActive();
+
+                switch (_powerupType)
+                {
+                    case PowerupTypeEnum.TRIPLE_SHOT:
+                        player.TripleShotActive();
+                        break;
+                    case PowerupTypeEnum.SPEED_BOOST:
+                        player.SpeedBoostActive();
+                        Debug.Log("SPEED BOOST ACTIVATED!");
+                        break;
+                    case PowerupTypeEnum.SHIELD:
+                        player.ShieldActive();
+                        Debug.Log("SHIELD ACTIVATED!");
+                        break;
+                    default:
+                        _powerupType = PowerupTypeEnum.NONE;
+                        Debug.Log("No powerup!");
+                        break;
+                }
             }
-            
+
             Destroy(this.gameObject);
         }
     }

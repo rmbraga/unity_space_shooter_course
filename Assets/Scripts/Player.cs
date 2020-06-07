@@ -1,15 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     [SerializeField]
-    private float _speed = 3.5f;
+    private float _speed = 5f;
+    private float _speedMultiplier = 2;
     [SerializeField]
     private GameObject _laserPrefab;
     [SerializeField]
     private GameObject _tripleShotPrefab;
+    [SerializeField]
+    private GameObject _shieldVisualizer;
     [SerializeField]
     private float _fireRate = 0.15f;
     private float _canFire = 0.0f;
@@ -18,17 +22,21 @@ public class Player : MonoBehaviour
     private SpawnManager _spawnManager;
     [SerializeField]
     private bool _isTripleShotActive = false;
+    [SerializeField]
+    private bool _isShieldActive = false;
+    [SerializeField]
+    private int _score;
+    private UIManager _uiManager;
 
     // Start is called before the first frame update
     void Start()
     {
         transform.position = new Vector3(x: 0, y: 0, z: 0);
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
 
-        if (_spawnManager == null)
-        {
-            Debug.LogError("Spawn Manager is NULL!");
-        }
+        Utils.CheckIfGameObjectIsNull(_spawnManager);
+        Utils.CheckIfGameObjectIsNull(_uiManager);
     }
 
     // Update is called once per frame
@@ -83,7 +91,15 @@ public class Player : MonoBehaviour
 
     public void Damage()
     {
+        if(_isShieldActive)
+        {
+            _isShieldActive = false;
+            _shieldVisualizer.SetActive(false);
+            return;
+        }
+
         _lives -= 1;
+        _uiManager.updateLives(_lives);
 
         if (_lives == 0)
         {
@@ -98,9 +114,41 @@ public class Player : MonoBehaviour
         StartCoroutine(TripleShotPowerDownRoutine());
     }
 
+    public void SpeedBoostActive()
+    {
+        _speed *= _speedMultiplier;
+        StartCoroutine(SpeedBoostPowerDownRoutine());
+    }
+
     IEnumerator TripleShotPowerDownRoutine()
     {
         yield return new WaitForSeconds(5);
         _isTripleShotActive = false;
+    }
+
+    IEnumerator SpeedBoostPowerDownRoutine()
+    {
+        yield return new WaitForSeconds(5);
+        _speed /= _speedMultiplier;
+    }
+
+    public void ShieldActive()
+    {
+        _isShieldActive = true;
+        _shieldVisualizer.SetActive(true);
+        StartCoroutine(ShieldDownRoutine());
+    }
+
+    IEnumerator ShieldDownRoutine()
+    {
+        yield return new WaitForSeconds(8);
+        _isShieldActive = false;
+        _shieldVisualizer.SetActive(false);
+    }
+
+    public void AddScore(int points)
+    {
+        _score += 10;
+        _uiManager.updateScore(_score);
     }
 }
