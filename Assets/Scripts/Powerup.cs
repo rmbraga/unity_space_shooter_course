@@ -10,6 +10,8 @@ public class Powerup : MonoBehaviour
     private float _speed = 3.0f;
     [SerializeField]
     private PowerupTypeEnum _powerupType;
+    [SerializeField]
+    AudioClip _explosionAudioClip;
 
     // Update is called once per frame
     void Update()
@@ -26,9 +28,10 @@ public class Powerup : MonoBehaviour
         if (other.tag == "Player")
         {
             Player player = other.transform.GetComponent<Player>();
+            AudioSource.PlayClipAtPoint(_explosionAudioClip, transform.position);
+
             if (player != null)
             {
-
                 switch (_powerupType)
                 {
                     case PowerupTypeEnum.TRIPLE_SHOT:

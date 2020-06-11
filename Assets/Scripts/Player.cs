@@ -15,6 +15,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _shieldVisualizer;
     [SerializeField]
+    private GameObject _selfFireRight;
+    [SerializeField]
+    private GameObject _selfFireLeft;
+    [SerializeField]
     private float _fireRate = 0.15f;
     private float _canFire = 0.0f;
     [SerializeField]
@@ -27,6 +31,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     private int _score;
     private UIManager _uiManager;
+    [SerializeField]
+    private AudioSource _laserAudioSource;
+    [SerializeField]
+    private AudioClip _laserAudioClip;
 
     // Start is called before the first frame update
     void Start()
@@ -34,6 +42,8 @@ public class Player : MonoBehaviour
         transform.position = new Vector3(x: 0, y: 0, z: 0);
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
+        _laserAudioSource = GetComponent<AudioSource>();
+        _laserAudioSource.clip = _laserAudioClip;
 
         Utils.CheckIfGameObjectIsNull(_spawnManager);
         Utils.CheckIfGameObjectIsNull(_uiManager);
@@ -87,11 +97,13 @@ public class Player : MonoBehaviour
         {
             Instantiate(_laserPrefab, transform.position + (_laserPrefab.transform.up * 1.05f), Quaternion.identity);
         }
+
+        _laserAudioSource.Play();
     }
 
     public void Damage()
     {
-        if(_isShieldActive)
+        if (_isShieldActive)
         {
             _isShieldActive = false;
             _shieldVisualizer.SetActive(false);
@@ -100,6 +112,15 @@ public class Player : MonoBehaviour
 
         _lives -= 1;
         _uiManager.updateLives(_lives);
+
+        if (_lives == 2)
+        {
+            _selfFireRight.SetActive(true);
+        }
+        else
+        {
+            _selfFireLeft.SetActive(true);
+        }
 
         if (_lives == 0)
         {
